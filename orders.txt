@@ -1,6 +1,6 @@
 id,name
-1,Buy vegetables
-4,Wash vegetables
-5,Cut vegetables
-6,Cook vegetables
-7,Serve vegtables
+1,Buy 
+4,Wash 
+5,Cut 
+6,Cook 
+7,Serve
