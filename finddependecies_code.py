@@ -1,33 +1,41 @@
+import argparse
 import pandas as pd
 import json
 
-df1 = pd.read_csv('orders.txt', sep=",", header=0)
-df2 = pd.read_csv('dependencies.txt', sep=",", header=0)
-df2 = df2.sort_values(['id', 'child_id'], ascending=[True, True])
-df=pd.merge(df2, df1, on='id', how='outer')
-df2['ch']=0
+#import arg data, setting dataframes ,merging and sorting based on orders id
+parser = argparse.ArgumentParser()
+parser.add_argument('order')
+parser.add_argument('dependencies')
+parser.add_argument('output')
+args = parser.parse_args()
+dforder = pd.read_csv(args.order, sep=",", header=0)
+dfdependency = pd.read_csv(args.dependencies, sep=",", header=0)
+df=pd.merge(dfdependency, dforder, on='id', how='outer')
+df = df.sort_values(['id'], ascending=[True])
+df['check'] = 0
 
-
-def parent(i):
+# recursive function for finding children
+def find_children(i):
+    df.loc[df['id'] == i, 'check'] = 1
     d = {}
-    d["id"] = i
+    d["id"] = int(i)
     d["name"] = str(df.loc[df.id == i, 'name'].values[0])
     d["dependencies"] = []
+    df_children = dfdependency.loc[dfdependency['id'] == i]
+    for index, row in df_children.iterrows():
+        founded_child = find_children(row['child_id'])
 
-    a = df2.loc[df2['id'] == i]
-    for j in a['child_id']:
-        if (row['ch'] == 0):
-            b = parent(j)
-        d["dependencies"].append(b)
-    df2.loc[df2['id'] == i, 'ch'] = 1
+        d["dependencies"].append(founded_child)
+
     return (d)
 
+# finding parents and storing them
+datastore = []
+for item in df['id']:
+    if ((df.loc[df['id'] == item, 'check'].values[0]) == 0):
+        df.loc[df['id'] == item, 'check'] = 1
+        datastore.append(find_children(item))
+    #saving as a json file
+    with open('output.json', 'w') as f:
+        json.dump(datastore, f, indent=5)
 
-g = []
-for index, row in df2.iterrows():
-    if (row['ch'] == 0):
-        g.append(parent(row['id']))
-        a = (str(g))
-        with open('data.json', 'w') as f:
-            json.dump(a, f)
-df2.loc[df2['id'] == row['id'], 'ch'] = 1
