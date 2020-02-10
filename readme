@@ -1,0 +1,5 @@
+The expected output of the program is a JSON file that shows all the work orders and their dependencies (based on orders and dependencies file)
+Since the program will be used with different inputs, it takes files as command-line arguments.
+The output file, which shows the dependencies and orders of the file in a JSON format, is created as output.json file.
+To run the program type the following line in terminal:
+"python finddependecies_code.py orders.txt dependencies.txt output.json"
